@@ -1,0 +1,603 @@
+<!doctype html>
+<html lang="es">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
+<meta name="apple-mobile-web-app-capable" content="yes">
+<meta name="mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-status-bar-style" content="default">
+<meta name="apple-mobile-web-app-title" content="Clases">
+<meta name="theme-color" content="#f3f4ef" media="(prefers-color-scheme: light)">
+<meta name="theme-color" content="#121418" media="(prefers-color-scheme: dark)">
+<link rel="manifest" href="manifest.json">
+<link rel="apple-touch-icon" href="icon-180.png">
+<link rel="icon" href="icon-192.png">
+<title>Registro de Clases</title>
+<style>
+/* Layout: una columna tipo libreta, saldo arriba, barra de pestañas fija abajo */
+:root{
+  --bg:#f3f4ef; --surface:#ffffff; --ink:#1c2230; --muted:#5f6675; --line:#dfe1d8;
+  --accent:#2446a6; --accent-ink:#ffffff; --accent-soft:#e6ebf8;
+  --good:#23794a; --good-soft:#e3f2e8; --warn:#8a5200; --warn-soft:#fbf0dc; --danger:#b3261e;
+  --font:-apple-system,BlinkMacSystemFont,"SF Pro Text",system-ui,"Segoe UI",Roboto,sans-serif;
+  --display:ui-rounded,-apple-system,"SF Pro Rounded",system-ui,sans-serif;
+  --r:16px; color-scheme:light;
+}
+@media (prefers-color-scheme: dark){
+  :root{
+    --bg:#121418; --surface:#1b1e24; --ink:#eceef2; --muted:#9aa1ad; --line:#2c3038;
+    --accent:#8fa8ff; --accent-ink:#0e1530; --accent-soft:#232c47;
+    --good:#6fcf97; --good-soft:#1c3326; --warn:#f2b35c; --warn-soft:#3a2d17; --danger:#ff8a80;
+    color-scheme:dark;
+  }
+}
+*{box-sizing:border-box}
+html,body{margin:0;background:var(--bg);color:var(--ink);font-family:var(--font);font-size:16px;line-height:1.4;-webkit-text-size-adjust:100%;-webkit-tap-highlight-color:transparent}
+body{padding-top:env(safe-area-inset-top,0px);padding-bottom:calc(84px + env(safe-area-inset-bottom,0px))}
+[hidden]{display:none!important}
+.wrap{max-width:560px;margin:0 auto;padding-inline:16px;padding-block:12px 24px;display:flex;flex-direction:column;gap:16px}
+h1{font-family:var(--display);font-size:1.6rem;margin:4px 0 0;letter-spacing:-.01em}
+h2{font-size:.78rem;text-transform:uppercase;letter-spacing:.08em;color:var(--muted);margin:0 0 8px;font-weight:600}
+.num{font-variant-numeric:tabular-nums}
+.card{background:var(--surface);border:1px solid var(--line);border-radius:var(--r);padding:16px}
+.muted{color:var(--muted)}
+.small{font-size:.86rem}
+
+/* Saldo */
+.saldo{background:var(--accent);color:var(--accent-ink);border:0;border-radius:20px;padding:20px}
+.saldo .lbl{font-size:.85rem;opacity:.85}
+.saldo .big{font-family:var(--display);font-size:2.6rem;font-weight:700;letter-spacing:-.02em;line-height:1.1;margin:4px 0 10px}
+.saldo .row{display:flex;gap:16px;flex-wrap:wrap;font-size:.9rem;opacity:.9}
+
+/* Bloque actual */
+.bloque .top{display:flex;justify-content:space-between;align-items:baseline;gap:12px;flex-wrap:wrap}
+.bloque .horas{font-family:var(--display);font-size:1.8rem;font-weight:700}
+.escenarios{display:grid;grid-template-columns:repeat(3,1fr);gap:8px;margin-top:12px}
+.esc{border:1px solid var(--line);border-radius:12px;padding:10px;min-width:0}
+.esc b{display:block;font-size:1.05rem}
+.esc span{font-size:.75rem;color:var(--muted)}
+
+/* Formularios */
+label{display:flex;flex-direction:column;gap:4px;font-size:.85rem;color:var(--muted);min-width:0}
+input[type=text],input[type=date]{font:inherit;font-size:1rem;color:var(--ink);background:var(--bg);border:1px solid var(--line);border-radius:12px;padding:11px 12px;width:100%;min-width:0;-webkit-appearance:none;appearance:none}
+input:focus-visible,button:focus-visible{outline:2px solid var(--accent);outline-offset:2px}
+.fields{display:grid;grid-template-columns:1fr 1fr;gap:10px}
+.fields .full{grid-column:1/-1}
+.chips{display:grid;grid-template-columns:repeat(4,1fr);gap:8px}
+button{font:inherit;cursor:pointer;border-radius:12px;border:1px solid var(--line);background:var(--surface);color:var(--ink);padding:11px 12px;font-weight:600}
+button.primary{background:var(--accent);border-color:var(--accent);color:var(--accent-ink)}
+button.chip{font-size:1.05rem;padding:14px 0;background:var(--accent-soft);border-color:transparent;color:var(--accent)}
+button.danger{color:var(--danger)}
+button.link{background:none;border:0;padding:4px 0;color:var(--accent)}
+.actions{display:flex;gap:8px;flex-wrap:wrap;margin-top:12px}
+.actions>*{flex:1 1 auto}
+.check{flex-direction:row;align-items:center;gap:10px;color:var(--ink);font-size:1rem;padding:8px 0}
+.check input{width:22px;height:22px;accent-color:var(--accent)}
+
+/* Listas */
+.list{display:flex;flex-direction:column}
+.item{display:flex;align-items:center;gap:12px;padding:12px 0;border-top:1px solid var(--line);background:none;border-left:0;border-right:0;border-bottom:0;border-radius:0;width:100%;text-align:left;font-weight:400}
+.item:first-child{border-top:0}
+.item .main{flex:1;min-width:0}
+.item .main .t{font-weight:600}
+.item .main .s{font-size:.82rem;color:var(--muted);overflow-wrap:anywhere}
+.item .amt{text-align:right;font-weight:600;white-space:nowrap}
+.item .amt small{display:block;font-weight:400;font-size:.78rem;color:var(--muted)}
+.blockhead{display:flex;justify-content:space-between;align-items:flex-start;gap:12px;margin-bottom:6px}
+.blockhead .t{font-weight:700}
+.pill{display:inline-block;font-size:.72rem;font-weight:700;padding:3px 8px;border-radius:99px;letter-spacing:.02em;white-space:nowrap}
+.pill.good{background:var(--good-soft);color:var(--good)}
+.pill.warn{background:var(--warn-soft);color:var(--warn)}
+.pill.open{background:var(--accent-soft);color:var(--accent)}
+.notice{border-radius:var(--r);padding:14px 16px;display:flex;gap:12px;align-items:center;justify-content:space-between;flex-wrap:wrap}
+.notice.warn{background:var(--warn-soft);color:var(--warn)}
+.notice.info{background:var(--accent-soft);color:var(--accent)}
+.notice button{background:var(--surface);border-color:transparent;color:inherit}
+.empty{text-align:center;color:var(--muted);padding:12px 0;font-size:.92rem}
+
+/* Barra inferior */
+nav{position:fixed;left:0;right:0;bottom:0;background:var(--surface);border-top:1px solid var(--line);padding:6px 8px calc(6px + env(safe-area-inset-bottom,0px));display:grid;grid-template-columns:repeat(5,1fr);z-index:5}
+nav button{border:0;background:none;display:flex;flex-direction:column;align-items:center;gap:2px;font-size:.7rem;font-weight:600;color:var(--muted);padding:6px 0}
+nav button svg{width:24px;height:24px;stroke:currentColor;fill:none;stroke-width:1.8;stroke-linecap:round;stroke-linejoin:round}
+nav button[aria-current=page]{color:var(--accent)}
+
+/* Diálogo y aviso */
+dialog{border:0;border-radius:20px;padding:0;width:min(520px,calc(100% - 32px));background:var(--surface);color:var(--ink)}
+dialog::backdrop{background:rgba(10,12,18,.45)}
+dialog form{padding:20px;display:flex;flex-direction:column;gap:12px}
+dialog h3{margin:0;font-family:var(--display);font-size:1.2rem}
+.toast{position:fixed;left:16px;right:16px;bottom:calc(92px + env(safe-area-inset-bottom,0px));max-width:528px;margin:0 auto;background:var(--ink);color:var(--bg);border-radius:14px;padding:12px 14px;display:flex;gap:12px;align-items:center;justify-content:space-between;z-index:10;font-size:.92rem}
+.toast button{background:none;border:0;color:inherit;text-decoration:underline;padding:4px}
+@media (prefers-reduced-motion:no-preference){.toast{animation:up .18s ease-out}@keyframes up{from{transform:translateY(8px);opacity:0}}}
+</style>
+</head>
+<body>
+
+<!-- INICIO -->
+<main class="wrap" id="v-inicio">
+  <div>
+    <div class="muted small" id="grupoNombre"></div>
+    <h1>Clases</h1>
+  </div>
+
+  <section class="saldo" aria-live="polite">
+    <div class="lbl" id="saldoLbl">Te deben</div>
+    <div class="big num" id="saldo">0,00 €</div>
+    <div class="row num"><span id="generado">Generado 0 €</span><span id="pagado">Pagado 0 €</span></div>
+  </section>
+
+  <div id="avisos" class="list" style="gap:10px"></div>
+
+  <section class="card">
+    <h2>Apuntar horas</h2>
+    <div class="chips">
+      <button class="chip" data-add="1">1 h</button>
+      <button class="chip" data-add="1.5">1,5 h</button>
+      <button class="chip" data-add="2">2 h</button>
+      <button class="chip" data-add="3">3 h</button>
+    </div>
+    <div class="fields" style="margin-top:12px">
+      <label for="addFecha">Fecha
+        <input type="date" id="addFecha">
+      </label>
+      <label for="addHoras">Otra duración (h)
+        <input type="text" id="addHoras" inputmode="decimal" placeholder="1,25">
+      </label>
+    </div>
+    <div class="actions"><button class="primary" id="addOtra">Apuntar</button></div>
+  </section>
+
+  <section class="card bloque">
+    <h2 id="bloqueTitulo">Bloque actual</h2>
+    <div class="top">
+      <div class="horas num" id="bloqueHoras">0 h</div>
+      <div class="muted small" id="bloqueDesde"></div>
+    </div>
+    <div class="escenarios num" id="escenarios"></div>
+  </section>
+
+  <section class="card">
+    <h2>Últimas clases</h2>
+    <div class="list" id="ultimas"></div>
+  </section>
+</main>
+
+<!-- HORAS -->
+<main class="wrap" id="v-horas" hidden>
+  <h1>Horas</h1>
+  <div id="bloques" style="display:flex;flex-direction:column;gap:16px"></div>
+</main>
+
+<!-- PARCIALES -->
+<main class="wrap" id="v-parciales" hidden>
+  <h1>Parciales</h1>
+  <section class="card">
+    <h2>Nuevo parcial</h2>
+    <p class="small muted" style="margin:0 0 12px">Cierra el bloque: todas las horas hasta esta fecha se pagan a 25 €/h más 5 €/h por cada alumno que apruebe.</p>
+    <div class="fields">
+      <label for="parNombre" class="full">Nombre
+        <input type="text" id="parNombre" placeholder="Parcial 1 de Mates">
+      </label>
+      <label for="parFecha" class="full">Fecha del parcial
+        <input type="date" id="parFecha">
+      </label>
+    </div>
+    <div id="parAlumnos" style="margin-top:8px"></div>
+    <label class="check" for="parPendiente"><input type="checkbox" id="parPendiente"> Aún no sé el resultado</label>
+    <div class="actions"><button class="primary" id="parGuardar">Guardar parcial</button></div>
+  </section>
+  <section class="card">
+    <h2>Historial</h2>
+    <div class="list" id="listaParciales"></div>
+  </section>
+</main>
+
+<!-- PAGOS -->
+<main class="wrap" id="v-pagos" hidden>
+  <h1>Pagos</h1>
+  <section class="card">
+    <h2>Apuntar pago</h2>
+    <div class="fields">
+      <label for="pagImporte">Importe (€)
+        <input type="text" id="pagImporte" inputmode="decimal" placeholder="250">
+      </label>
+      <label for="pagFecha">Fecha
+        <input type="date" id="pagFecha">
+      </label>
+      <label for="pagNota" class="full">Nota (opcional)
+        <input type="text" id="pagNota" placeholder="Septiembre, Bizum…">
+      </label>
+    </div>
+    <div class="actions"><button class="primary" id="pagGuardar">Guardar pago</button></div>
+  </section>
+  <section class="card">
+    <h2 id="pagosTitulo">Pagos recibidos</h2>
+    <div class="list" id="listaPagos"></div>
+  </section>
+</main>
+
+<!-- AJUSTES -->
+<main class="wrap" id="v-ajustes" hidden>
+  <h1>Ajustes</h1>
+  <section class="card">
+    <h2>Grupo</h2>
+    <div class="fields">
+      <label for="al0">Alumno 1<input type="text" id="al0"></label>
+      <label for="al1">Alumno 2<input type="text" id="al1"></label>
+      <label for="cfgTarifa">Tarifa base (€/h)<input type="text" id="cfgTarifa" inputmode="decimal"></label>
+      <label for="cfgBonus">Extra por aprobado (€/h)<input type="text" id="cfgBonus" inputmode="decimal"></label>
+    </div>
+    <p class="small muted" style="margin:12px 0 0">Cambiar la tarifa recalcula todas las horas ya apuntadas.</p>
+  </section>
+  <section class="card">
+    <h2>Copia de seguridad</h2>
+    <p class="small muted" style="margin:0" id="copiaInfo"></p>
+    <div class="actions">
+      <button class="primary" id="btnExportar">Exportar copia</button>
+      <button id="btnImportar">Importar copia</button>
+      <input type="file" id="fileImport" accept=".json,application/json" hidden>
+    </div>
+  </section>
+  <section class="card">
+    <h2>Borrar datos</h2>
+    <p class="small muted" style="margin:0">Elimina todas las horas, parciales y pagos de este iPhone.</p>
+    <div class="actions"><button class="danger" id="btnBorrarTodo">Borrar todo</button></div>
+  </section>
+</main>
+
+<nav aria-label="Secciones">
+  <button data-view="inicio" aria-current="page"><svg viewBox="0 0 24 24"><path d="M3 11l9-7 9 7v9a1 1 0 0 1-1 1h-5v-6H9v6H4a1 1 0 0 1-1-1z"/></svg>Inicio</button>
+  <button data-view="horas"><svg viewBox="0 0 24 24"><circle cx="12" cy="12" r="9"/><path d="M12 7v5l3 2"/></svg>Horas</button>
+  <button data-view="parciales"><svg viewBox="0 0 24 24"><path d="M7 3h7l5 5v13H7z"/><path d="M14 3v5h5"/><path d="M10 14l2 2 4-4"/></svg>Parciales</button>
+  <button data-view="pagos"><svg viewBox="0 0 24 24"><rect x="3" y="6" width="18" height="13" rx="2"/><path d="M3 10h18"/><path d="M7 15h3"/></svg>Pagos</button>
+  <button data-view="ajustes"><svg viewBox="0 0 24 24"><path d="M4 7h10M18 7h2M4 17h4M12 17h8"/><circle cx="16" cy="7" r="2"/><circle cx="10" cy="17" r="2"/></svg>Ajustes</button>
+</nav>
+
+<dialog id="dlg"><form method="dialog" id="dlgForm"></form></dialog>
+<div class="toast" id="toast" hidden role="status"><span id="toastTxt"></span><button id="toastBtn" hidden>Deshacer</button></div>
+
+<script>
+'use strict';
+const KEY = 'registro-clases-v1';
+const $ = s => document.querySelector(s);
+const eur = new Intl.NumberFormat('es-ES', { style: 'currency', currency: 'EUR' });
+const numf = new Intl.NumberFormat('es-ES', { maximumFractionDigits: 2 });
+const fmtH = h => numf.format(h) + ' h';
+const uid = () => Date.now().toString(36) + Math.random().toString(36).slice(2, 7);
+const today = () => { const d = new Date(); d.setMinutes(d.getMinutes() - d.getTimezoneOffset()); return d.toISOString().slice(0, 10); };
+const fmtD = iso => { const [y, m, d] = iso.split('-').map(Number); return new Date(y, m - 1, d).toLocaleDateString('es-ES', { weekday: 'short', day: 'numeric', month: 'short' }); };
+const fmtDLargo = iso => { const [y, m, d] = iso.split('-').map(Number); return new Date(y, m - 1, d).toLocaleDateString('es-ES', { day: 'numeric', month: 'long', year: 'numeric' }); };
+const parseNum = v => { const n = parseFloat(String(v).replace(/\s/g, '').replace(',', '.')); return isFinite(n) ? n : NaN; };
+const esc = s => String(s ?? '').replace(/[&<>"']/g, c => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', "'": '&#39;' }[c]));
+const byDate = (a, b) => a.fecha < b.fecha ? -1 : a.fecha > b.fecha ? 1 : 0;
+
+function defaults() {
+  return { version: 1, tarifa: 25, bonus: 5, alumnos: ['Alumno 1', 'Alumno 2'], sesiones: [], parciales: [], pagos: [], ultimaCopia: null };
+}
+function normalize(o) {
+  const d = defaults();
+  const r = Object.assign({}, d, o || {});
+  ['sesiones', 'parciales', 'pagos'].forEach(k => { if (!Array.isArray(r[k])) r[k] = []; });
+  if (!Array.isArray(r.alumnos) || r.alumnos.length < 1) r.alumnos = d.alumnos;
+  r.tarifa = parseNum(r.tarifa); if (!(r.tarifa >= 0)) r.tarifa = d.tarifa;
+  r.bonus = parseNum(r.bonus); if (!(r.bonus >= 0)) r.bonus = d.bonus;
+  return r;
+}
+function load() {
+  try { const raw = localStorage.getItem(KEY); if (raw) return normalize(JSON.parse(raw)); } catch (e) {}
+  return defaults();
+}
+let S = load();
+function save() {
+  try { localStorage.setItem(KEY, JSON.stringify(S)); }
+  catch (e) { toast('No se ha podido guardar. Exporta una copia desde Ajustes.'); }
+  render();
+}
+
+/* ---------- Cálculo ----------
+   Cada parcial cierra un bloque con todas las horas hasta su fecha (incluida).
+   Precio del bloque = tarifa + extra × nº de aprobados. Sin parcial o sin resultado: tarifa base. */
+function compute(state) {
+  const parc = [...state.parciales].sort(byDate);
+  const bloques = parc.map(p => ({ p, ses: [] }));
+  const abierto = { p: null, ses: [] };
+  [...state.sesiones].sort(byDate).forEach(x => {
+    const b = bloques.find(b => x.fecha <= b.p.fecha);
+    (b || abierto).ses.push(x);
+  });
+  const todos = [...bloques, abierto];
+  let generado = 0;
+  todos.forEach(b => {
+    b.horas = b.ses.reduce((a, x) => a + x.horas, 0);
+    b.conResultado = !!(b.p && Array.isArray(b.p.aprobados));
+    b.nAprob = b.conResultado ? b.p.aprobados.filter(Boolean).length : 0;
+    b.precio = state.tarifa + state.bonus * b.nAprob;
+    b.importe = b.horas * b.precio;
+    generado += b.importe;
+  });
+  const pagado = state.pagos.reduce((a, x) => a + x.importe, 0);
+  const r2 = n => Math.round(n * 100) / 100;
+  return { bloques, abierto, generado: r2(generado), pagado: r2(pagado), saldo: r2(generado - pagado) };
+}
+
+/* ---------- Render ---------- */
+function render() {
+  const C = compute(S);
+  const nombres = S.alumnos.filter(Boolean).join(' y ');
+  $('#grupoNombre').textContent = nombres ? 'Grupo de ' + nombres : '';
+
+  // Saldo
+  $('#saldoLbl').textContent = C.saldo < 0 ? 'Te han pagado de más' : 'Te deben';
+  $('#saldo').textContent = eur.format(Math.abs(C.saldo));
+  $('#generado').textContent = 'Generado ' + eur.format(C.generado);
+  $('#pagado').textContent = 'Pagado ' + eur.format(C.pagado);
+
+  // Avisos
+  const av = [];
+  const hoy = today();
+  S.parciales.filter(p => !Array.isArray(p.aprobados) && p.fecha <= hoy).sort(byDate).forEach(p => {
+    av.push(`<div class="notice warn"><span><b>${esc(p.nombre || 'Parcial')}</b> (${fmtD(p.fecha)}) sin resultado</span><button type="button" data-edit="parcial:${p.id}">Poner resultado</button></div>`);
+  });
+  const hayDatos = S.sesiones.length + S.pagos.length + S.parciales.length > 0;
+  const diasCopia = S.ultimaCopia ? Math.floor((Date.parse(hoy) - Date.parse(S.ultimaCopia)) / 864e5) : null;
+  if (hayDatos && (diasCopia === null || diasCopia >= 14)) {
+    av.push(`<div class="notice info"><span>${diasCopia === null ? 'Aún no has hecho ninguna copia de seguridad' : 'Última copia hace ' + diasCopia + ' días'}</span><button type="button" data-act="exportar">Exportar</button></div>`);
+  }
+  $('#avisos').innerHTML = av.join('');
+  $('#avisos').hidden = av.length === 0;
+
+  // Bloque actual
+  const ab = C.abierto;
+  const ultimoParcial = [...S.parciales].sort(byDate).pop();
+  $('#bloqueTitulo').textContent = 'Hacia el próximo parcial';
+  $('#bloqueHoras').textContent = fmtH(ab.horas);
+  $('#bloqueDesde').textContent = ultimoParcial ? 'desde ' + fmtD(ultimoParcial.fecha) : (ab.ses.length ? 'desde ' + fmtD(ab.ses[0].fecha) : 'aún sin horas');
+  const nAl = Math.max(2, S.alumnos.length);
+  const escs = [];
+  for (let k = 0; k <= Math.min(2, nAl); k++) {
+    const precio = S.tarifa + S.bonus * k;
+    escs.push(`<div class="esc"><span>${k === 0 ? 'Ninguno aprueba' : k === 1 ? 'Aprueba 1' : 'Aprueban 2'}</span><b>${eur.format(ab.horas * precio)}</b><span>${numf.format(precio)} €/h</span></div>`);
+  }
+  $('#escenarios').innerHTML = escs.join('');
+
+  // Últimas clases
+  const precioDe = new Map();
+  C.bloques.concat([C.abierto]).forEach(b => b.ses.forEach(x => precioDe.set(x.id, b)));
+  const filaSesion = x => {
+    const b = precioDe.get(x.id);
+    const prov = !b.conResultado;
+    return `<button type="button" class="item" data-edit="sesion:${x.id}">
+      <div class="main"><div class="t">${fmtD(x.fecha)}</div>${x.nota ? `<div class="s">${esc(x.nota)}</div>` : ''}</div>
+      <div class="amt num">${fmtH(x.horas)}<small>${eur.format(x.horas * b.precio)}${prov ? ' · provisional' : ''}</small></div></button>`;
+  };
+  const ult = [...S.sesiones].sort(byDate).reverse().slice(0, 5);
+  $('#ultimas').innerHTML = ult.length ? ult.map(filaSesion).join('') : '<div class="empty">Toca 1 h, 1,5 h… arriba y la clase se apunta con la fecha de hoy.</div>';
+
+  // Vista Horas: bloques del más reciente al más antiguo
+  const bl = [...C.bloques, C.abierto].reverse().filter(b => b.p || b.ses.length);
+  $('#bloques').innerHTML = bl.length ? bl.map(b => {
+    let titulo, pill;
+    if (!b.p) { titulo = 'Bloque actual'; pill = `<span class="pill open">${numf.format(b.precio)} €/h provisional</span>`; }
+    else {
+      titulo = esc(b.p.nombre || 'Parcial') + ' · ' + fmtD(b.p.fecha);
+      pill = b.conResultado
+        ? `<span class="pill good">${b.nAprob} aprobado${b.nAprob === 1 ? '' : 's'} · ${numf.format(b.precio)} €/h</span>`
+        : `<span class="pill warn">Sin resultado · ${numf.format(b.precio)} €/h</span>`;
+    }
+    return `<section class="card"><div class="blockhead"><div><div class="t">${titulo}</div><div class="small muted num">${fmtH(b.horas)} · ${eur.format(b.importe)}</div></div>${pill}</div>
+      <div class="list">${b.ses.length ? [...b.ses].reverse().map(filaSesion).join('') : '<div class="empty">Sin horas en este bloque.</div>'}</div></section>`;
+  }).join('') : '<section class="card"><div class="empty">Todavía no hay horas. Apúntalas desde Inicio.</div></section>';
+
+  // Parciales
+  $('#parAlumnos').innerHTML = S.alumnos.map((n, i) => `<label class="check" for="parAp${i}"><input type="checkbox" id="parAp${i}"> Ha aprobado ${esc(n || 'Alumno ' + (i + 1))}</label>`).join('');
+  syncPendiente();
+  const ps = [...C.bloques].reverse();
+  $('#listaParciales').innerHTML = ps.length ? ps.map(b => {
+    const p = b.p;
+    let res;
+    if (!b.conResultado) res = 'Resultado pendiente';
+    else {
+      const ap = S.alumnos.filter((_, i) => p.aprobados[i]);
+      res = ap.length ? 'Aprueba' + (ap.length > 1 ? 'n ' : ' ') + ap.map(esc).join(' y ') : 'No aprueba ninguno';
+    }
+    return `<button type="button" class="item" data-edit="parcial:${p.id}"><div class="main"><div class="t">${esc(p.nombre || 'Parcial')}</div><div class="s">${fmtDLargo(p.fecha)} · ${res}</div></div>
+      <div class="amt num">${eur.format(b.importe)}<small>${fmtH(b.horas)} a ${numf.format(b.precio)} €/h</small></div></button>`;
+  }).join('') : '<div class="empty">Aún no hay parciales.</div>';
+
+  // Pagos
+  const pg = [...S.pagos].sort(byDate).reverse();
+  $('#pagosTitulo').textContent = 'Pagos recibidos · ' + eur.format(C.pagado);
+  $('#listaPagos').innerHTML = pg.length ? pg.map(x => `<button type="button" class="item" data-edit="pago:${x.id}"><div class="main"><div class="t">${fmtD(x.fecha)}</div>${x.nota ? `<div class="s">${esc(x.nota)}</div>` : ''}</div><div class="amt num">${eur.format(x.importe)}</div></button>`).join('') : '<div class="empty">Aún no hay pagos.</div>';
+
+  // Ajustes
+  ['al0', 'al1'].forEach((id, i) => { const el = $('#' + id); if (document.activeElement !== el) el.value = S.alumnos[i] || ''; });
+  if (document.activeElement !== $('#cfgTarifa')) $('#cfgTarifa').value = numf.format(S.tarifa);
+  if (document.activeElement !== $('#cfgBonus')) $('#cfgBonus').value = numf.format(S.bonus);
+  $('#copiaInfo').textContent = S.ultimaCopia ? 'Última copia: ' + fmtDLargo(S.ultimaCopia) + '. Guárdala en Archivos o en iCloud Drive.' : 'Los datos solo están en este iPhone. Exporta una copia de vez en cuando y guárdala en Archivos o en iCloud Drive.';
+}
+
+/* ---------- Navegación ---------- */
+const VIEWS = ['inicio', 'horas', 'parciales', 'pagos', 'ajustes'];
+function show(v) {
+  VIEWS.forEach(n => { $('#v-' + n).hidden = n !== v; });
+  document.querySelectorAll('nav button').forEach(b => {
+    if (b.dataset.view === v) b.setAttribute('aria-current', 'page'); else b.removeAttribute('aria-current');
+  });
+  window.scrollTo(0, 0);
+}
+document.querySelector('nav').addEventListener('click', e => { const b = e.target.closest('button[data-view]'); if (b) show(b.dataset.view); });
+
+/* ---------- Aviso ---------- */
+let toastTimer, undoFn = null;
+function toast(msg, undo) {
+  $('#toastTxt').textContent = msg;
+  undoFn = undo || null;
+  $('#toastBtn').hidden = !undo;
+  $('#toast').hidden = false;
+  clearTimeout(toastTimer);
+  toastTimer = setTimeout(() => { $('#toast').hidden = true; undoFn = null; }, 4500);
+}
+$('#toastBtn').addEventListener('click', () => { if (undoFn) undoFn(); $('#toast').hidden = true; undoFn = null; });
+
+/* ---------- Apuntar horas ---------- */
+function addHoras(h) {
+  if (!(h > 0) || h > 24) { toast('Escribe una duración válida, por ejemplo 1,5'); return; }
+  const fecha = $('#addFecha').value || today();
+  const s = { id: uid(), fecha, horas: Math.round(h * 100) / 100, nota: '' };
+  S.sesiones.push(s);
+  save();
+  const b = compute(S);
+  const bloque = [...b.bloques, b.abierto].find(x => x.ses.some(y => y.id === s.id));
+  toast(`${fmtH(s.horas)} apuntadas el ${fmtD(fecha)} · +${eur.format(s.horas * bloque.precio)}`, () => { S.sesiones = S.sesiones.filter(x => x.id !== s.id); save(); });
+  $('#addHoras').value = '';
+  $('#addFecha').value = today();
+}
+document.querySelectorAll('[data-add]').forEach(b => b.addEventListener('click', () => addHoras(parseFloat(b.dataset.add))));
+$('#addOtra').addEventListener('click', () => addHoras(parseNum($('#addHoras').value)));
+
+/* ---------- Parciales ---------- */
+function syncPendiente() {
+  const pend = $('#parPendiente').checked;
+  S.alumnos.forEach((_, i) => { const c = $('#parAp' + i); if (c) { c.disabled = pend; if (pend) c.checked = false; } });
+}
+$('#parPendiente').addEventListener('change', syncPendiente);
+$('#parGuardar').addEventListener('click', () => {
+  const fecha = $('#parFecha').value || today();
+  const pend = $('#parPendiente').checked;
+  const p = { id: uid(), nombre: $('#parNombre').value.trim(), fecha, aprobados: pend ? null : S.alumnos.map((_, i) => $('#parAp' + i).checked) };
+  S.parciales.push(p);
+  $('#parNombre').value = ''; $('#parPendiente').checked = false; $('#parFecha').value = today();
+  save();
+  const b = compute(S).bloques.find(x => x.p.id === p.id);
+  toast(`Parcial guardado · ${fmtH(b.horas)} a ${numf.format(b.precio)} €/h = ${eur.format(b.importe)}`);
+});
+
+/* ---------- Pagos ---------- */
+$('#pagGuardar').addEventListener('click', () => {
+  const imp = parseNum($('#pagImporte').value);
+  if (!(imp > 0)) { toast('Escribe un importe válido, por ejemplo 250'); return; }
+  const p = { id: uid(), fecha: $('#pagFecha').value || today(), importe: Math.round(imp * 100) / 100, nota: $('#pagNota').value.trim() };
+  S.pagos.push(p);
+  $('#pagImporte').value = ''; $('#pagNota').value = ''; $('#pagFecha').value = today();
+  save();
+  toast(`Pago de ${eur.format(p.importe)} guardado`, () => { S.pagos = S.pagos.filter(x => x.id !== p.id); save(); });
+});
+
+/* ---------- Editar (diálogo) ---------- */
+const dlg = $('#dlg');
+function openEdit(kind, id) {
+  const col = kind === 'sesion' ? 'sesiones' : kind === 'pago' ? 'pagos' : 'parciales';
+  const it = S[col].find(x => x.id === id);
+  if (!it) return;
+  let html = '';
+  if (kind === 'sesion') {
+    html = `<h3>Editar clase</h3><div class="fields">
+      <label for="eFecha">Fecha<input type="date" id="eFecha" value="${it.fecha}"></label>
+      <label for="eHoras">Horas<input type="text" id="eHoras" inputmode="decimal" value="${numf.format(it.horas)}"></label>
+      <label for="eNota" class="full">Nota<input type="text" id="eNota" value="${esc(it.nota)}" placeholder="Opcional"></label></div>`;
+  } else if (kind === 'pago') {
+    html = `<h3>Editar pago</h3><div class="fields">
+      <label for="eImporte">Importe (€)<input type="text" id="eImporte" inputmode="decimal" value="${numf.format(it.importe)}"></label>
+      <label for="eFecha">Fecha<input type="date" id="eFecha" value="${it.fecha}"></label>
+      <label for="eNota" class="full">Nota<input type="text" id="eNota" value="${esc(it.nota)}" placeholder="Opcional"></label></div>`;
+  } else {
+    const pend = !Array.isArray(it.aprobados);
+    html = `<h3>Editar parcial</h3><div class="fields">
+      <label for="eNombre" class="full">Nombre<input type="text" id="eNombre" value="${esc(it.nombre)}"></label>
+      <label for="eFecha" class="full">Fecha<input type="date" id="eFecha" value="${it.fecha}"></label></div>
+      <div>${S.alumnos.map((n, i) => `<label class="check" for="eAp${i}"><input type="checkbox" id="eAp${i}" ${!pend && it.aprobados[i] ? 'checked' : ''} ${pend ? 'disabled' : ''}> Ha aprobado ${esc(n || 'Alumno ' + (i + 1))}</label>`).join('')}
+      <label class="check" for="ePend"><input type="checkbox" id="ePend" ${pend ? 'checked' : ''}> Aún no sé el resultado</label></div>`;
+  }
+  html += `<div class="actions"><button type="button" class="danger" id="eBorrar">Borrar</button><button type="button" id="eCancelar">Cancelar</button><button type="button" class="primary" id="eGuardar">Guardar</button></div>`;
+  $('#dlgForm').innerHTML = html;
+  if (kind === 'parcial') {
+    $('#ePend').addEventListener('change', () => S.alumnos.forEach((_, i) => { const c = $('#eAp' + i); c.disabled = $('#ePend').checked; if (c.disabled) c.checked = false; }));
+  }
+  let armado = false;
+  $('#eBorrar').addEventListener('click', () => {
+    if (!armado) { armado = true; $('#eBorrar').textContent = 'Toca otra vez para borrar'; return; }
+    S[col] = S[col].filter(x => x.id !== id);
+    dlg.close(); save(); toast('Borrado');
+  });
+  $('#eCancelar').addEventListener('click', () => dlg.close());
+  $('#eGuardar').addEventListener('click', () => {
+    const fecha = $('#eFecha').value || it.fecha;
+    if (kind === 'sesion') {
+      const h = parseNum($('#eHoras').value);
+      if (!(h > 0) || h > 24) { toast('Escribe una duración válida'); return; }
+      Object.assign(it, { fecha, horas: Math.round(h * 100) / 100, nota: $('#eNota').value.trim() });
+    } else if (kind === 'pago') {
+      const imp = parseNum($('#eImporte').value);
+      if (!(imp > 0)) { toast('Escribe un importe válido'); return; }
+      Object.assign(it, { fecha, importe: Math.round(imp * 100) / 100, nota: $('#eNota').value.trim() });
+    } else {
+      Object.assign(it, { fecha, nombre: $('#eNombre').value.trim(), aprobados: $('#ePend').checked ? null : S.alumnos.map((_, i) => $('#eAp' + i).checked) });
+    }
+    dlg.close(); save(); toast('Guardado');
+  });
+  dlg.showModal();
+}
+document.addEventListener('click', e => {
+  const ed = e.target.closest('[data-edit]');
+  if (ed) { const [k, id] = ed.dataset.edit.split(':'); openEdit(k, id); return; }
+  const act = e.target.closest('[data-act="exportar"]');
+  if (act) exportar();
+});
+
+/* ---------- Ajustes ---------- */
+['al0', 'al1'].forEach((id, i) => $('#' + id).addEventListener('change', e => { S.alumnos[i] = e.target.value.trim() || 'Alumno ' + (i + 1); save(); }));
+$('#cfgTarifa').addEventListener('change', e => { const n = parseNum(e.target.value); if (n >= 0) { S.tarifa = n; save(); toast('Tarifa actualizada'); } else render(); });
+$('#cfgBonus').addEventListener('change', e => { const n = parseNum(e.target.value); if (n >= 0) { S.bonus = n; save(); toast('Extra por aprobado actualizado'); } else render(); });
+
+/* ---------- Copia de seguridad ---------- */
+async function exportar() {
+  const nombre = `clases-${today()}.json`;
+  const texto = JSON.stringify({ app: 'registro-clases', exportado: new Date().toISOString(), datos: S }, null, 2);
+  const file = new File([texto], nombre, { type: 'application/json' });
+  try {
+    if (navigator.canShare && navigator.canShare({ files: [file] })) {
+      await navigator.share({ files: [file], title: 'Copia de clases' });
+      S.ultimaCopia = today(); save(); toast('Copia exportada');
+      return;
+    }
+  } catch (e) { if (e && e.name === 'AbortError') return; }
+  const a = document.createElement('a');
+  a.href = URL.createObjectURL(file); a.download = nombre;
+  document.body.appendChild(a); a.click();
+  setTimeout(() => { URL.revokeObjectURL(a.href); a.remove(); }, 1500);
+  S.ultimaCopia = today(); save(); toast('Copia exportada');
+}
+$('#btnExportar').addEventListener('click', exportar);
+$('#btnImportar').addEventListener('click', () => $('#fileImport').click());
+$('#fileImport').addEventListener('change', e => {
+  const f = e.target.files && e.target.files[0];
+  if (!f) return;
+  const rd = new FileReader();
+  rd.onload = () => {
+    try {
+      const o = JSON.parse(rd.result);
+      const d = normalize(o.datos || o);
+      const n = d.sesiones.length, p = d.pagos.length;
+      if (!confirm(`La copia tiene ${n} clases y ${p} pagos. ¿Sustituir los datos actuales?`)) return;
+      S = d; save(); toast('Copia importada');
+    } catch (err) { toast('Ese archivo no es una copia válida de esta app'); }
+    e.target.value = '';
+  };
+  rd.readAsText(f);
+});
+$('#btnBorrarTodo').addEventListener('click', () => {
+  if (!confirm('¿Borrar todas las horas, parciales y pagos? No se puede deshacer.')) return;
+  const keep = { tarifa: S.tarifa, bonus: S.bonus, alumnos: S.alumnos };
+  S = Object.assign(defaults(), keep); save(); toast('Datos borrados');
+});
+
+/* ---------- Arranque ---------- */
+['#addFecha', '#parFecha', '#pagFecha'].forEach(s => { $(s).value = today(); });
+render();
+try { navigator.storage && navigator.storage.persist && navigator.storage.persist(); } catch (e) {}
+if ('serviceWorker' in navigator && location.protocol.startsWith('http')) {
+  navigator.serviceWorker.register('sw.js').catch(() => {});
+}
+</script>
+</body>
+</html>
