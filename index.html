@@ -14,7 +14,7 @@
 <link rel="icon" href="icon-192.png">
 <title>Registro de Clases</title>
 <style>
-/* Layout: una columna tipo libreta, saldo arriba, barra de pestañas fija abajo */
+/* Layout: una columna tipo libreta, selector de grupo arriba, saldo, barra de pestañas fija abajo */
 :root{
   --bg:#f3f4ef; --surface:#ffffff; --ink:#1c2230; --muted:#5f6675; --line:#dfe1d8;
   --accent:#2446a6; --accent-ink:#ffffff; --accent-soft:#e6ebf8;
@@ -36,23 +36,31 @@ html,body{margin:0;background:var(--bg);color:var(--ink);font-family:var(--font)
 body{padding-top:env(safe-area-inset-top,0px);padding-bottom:calc(84px + env(safe-area-inset-bottom,0px))}
 [hidden]{display:none!important}
 .wrap{max-width:560px;margin:0 auto;padding-inline:16px;padding-block:12px 24px;display:flex;flex-direction:column;gap:16px}
-h1{font-family:var(--display);font-size:1.6rem;margin:4px 0 0;letter-spacing:-.01em}
+h1{font-family:var(--display);font-size:1.6rem;margin:0;letter-spacing:-.01em}
 h2{font-size:.78rem;text-transform:uppercase;letter-spacing:.08em;color:var(--muted);margin:0 0 8px;font-weight:600}
 .num{font-variant-numeric:tabular-nums}
 .card{background:var(--surface);border:1px solid var(--line);border-radius:var(--r);padding:16px}
 .muted{color:var(--muted)}
 .small{font-size:.86rem}
 
+/* Selector de grupo */
+.gbar-wrap{max-width:560px;margin:0 auto;padding-inline:16px;padding-block:12px 0}
+.gbar{display:flex;gap:8px;overflow-x:auto;scrollbar-width:none;padding-block:2px;margin-inline:-16px;padding-inline:16px}
+.gbar::-webkit-scrollbar{display:none}
+.gbar button{flex:0 0 auto;border-radius:99px;padding:8px 14px;font-size:.92rem;background:var(--surface);border:1px solid var(--line);color:var(--ink);max-width:70vw;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+.gbar button[aria-pressed=true]{background:var(--ink);border-color:var(--ink);color:var(--bg)}
+.gbar button.add{color:var(--accent);border-style:dashed}
+
 /* Saldo */
 .saldo{background:var(--accent);color:var(--accent-ink);border:0;border-radius:20px;padding:20px}
-.saldo .lbl{font-size:.85rem;opacity:.85}
+.saldo .lbl{font-size:.85rem;opacity:.85;overflow-wrap:anywhere}
 .saldo .big{font-family:var(--display);font-size:2.6rem;font-weight:700;letter-spacing:-.02em;line-height:1.1;margin:4px 0 10px}
-.saldo .row{display:flex;gap:16px;flex-wrap:wrap;font-size:.9rem;opacity:.9}
+.saldo .row{display:flex;gap:6px 16px;flex-wrap:wrap;font-size:.9rem;opacity:.9}
 
 /* Bloque actual */
 .bloque .top{display:flex;justify-content:space-between;align-items:baseline;gap:12px;flex-wrap:wrap}
 .bloque .horas{font-family:var(--display);font-size:1.8rem;font-weight:700}
-.escenarios{display:grid;grid-template-columns:repeat(3,1fr);gap:8px;margin-top:12px}
+.escenarios{display:grid;grid-template-columns:repeat(auto-fit,minmax(92px,1fr));gap:8px;margin-top:12px}
 .esc{border:1px solid var(--line);border-radius:12px;padding:10px;min-width:0}
 .esc b{display:block;font-size:1.05rem}
 .esc span{font-size:.75rem;color:var(--muted)}
@@ -68,21 +76,25 @@ button{font:inherit;cursor:pointer;border-radius:12px;border:1px solid var(--lin
 button.primary{background:var(--accent);border-color:var(--accent);color:var(--accent-ink)}
 button.chip{font-size:1.05rem;padding:14px 0;background:var(--accent-soft);border-color:transparent;color:var(--accent)}
 button.danger{color:var(--danger)}
-button.link{background:none;border:0;padding:4px 0;color:var(--accent)}
+button.link{background:none;border:0;padding:6px 0;color:var(--accent);text-align:left}
 .actions{display:flex;gap:8px;flex-wrap:wrap;margin-top:12px}
 .actions>*{flex:1 1 auto}
 .check{flex-direction:row;align-items:center;gap:10px;color:var(--ink);font-size:1rem;padding:8px 0}
-.check input{width:22px;height:22px;accent-color:var(--accent)}
+.check input{width:22px;height:22px;accent-color:var(--accent);flex:0 0 auto}
+.alrow{display:flex;gap:8px;align-items:center}
+.alrow input{flex:1}
+.alrow button{flex:0 0 auto;padding:10px 14px;color:var(--danger)}
 
 /* Listas */
 .list{display:flex;flex-direction:column}
 .item{display:flex;align-items:center;gap:12px;padding:12px 0;border-top:1px solid var(--line);background:none;border-left:0;border-right:0;border-bottom:0;border-radius:0;width:100%;text-align:left;font-weight:400}
 .item:first-child{border-top:0}
 .item .main{flex:1;min-width:0}
-.item .main .t{font-weight:600}
+.item .main .t{font-weight:600;overflow-wrap:anywhere}
 .item .main .s{font-size:.82rem;color:var(--muted);overflow-wrap:anywhere}
 .item .amt{text-align:right;font-weight:600;white-space:nowrap}
 .item .amt small{display:block;font-weight:400;font-size:.78rem;color:var(--muted)}
+.item.total{font-weight:700}
 .blockhead{display:flex;justify-content:space-between;align-items:flex-start;gap:12px;margin-bottom:6px}
 .blockhead .t{font-weight:700}
 .pill{display:inline-block;font-size:.72rem;font-weight:700;padding:3px 8px;border-radius:99px;letter-spacing:.02em;white-space:nowrap}
@@ -102,7 +114,7 @@ nav button svg{width:24px;height:24px;stroke:currentColor;fill:none;stroke-width
 nav button[aria-current=page]{color:var(--accent)}
 
 /* Diálogo y aviso */
-dialog{border:0;border-radius:20px;padding:0;width:min(520px,calc(100% - 32px));background:var(--surface);color:var(--ink)}
+dialog{border:0;border-radius:20px;padding:0;width:min(520px,calc(100% - 32px));max-height:calc(100% - 48px);background:var(--surface);color:var(--ink)}
 dialog::backdrop{background:rgba(10,12,18,.45)}
 dialog form{padding:20px;display:flex;flex-direction:column;gap:12px}
 dialog h3{margin:0;font-family:var(--display);font-size:1.2rem}
@@ -113,28 +125,34 @@ dialog h3{margin:0;font-family:var(--display);font-size:1.2rem}
 </head>
 <body>
 
-<!-- INICIO -->
-<main class="wrap" id="v-inicio">
-  <div>
-    <div class="muted small" id="grupoNombre"></div>
-    <h1>Clases</h1>
-  </div>
+<div class="gbar-wrap" id="gbarWrap"><div class="gbar" id="gbar" role="group" aria-label="Grupo"></div></div>
 
+<!-- SIN GRUPOS -->
+<main class="wrap" id="v-vacio" hidden>
+  <h1>Clases</h1>
+  <section class="card">
+    <p style="margin:0 0 12px">Crea un grupo para empezar a apuntar horas. Un grupo puede ser un solo alumno o varios que van juntos a clase.</p>
+    <button class="primary" type="button" data-act="nuevoGrupo" style="width:100%">Crear grupo</button>
+  </section>
+</main>
+
+<!-- INICIO -->
+<main class="wrap" id="v-inicio" hidden>
   <section class="saldo" aria-live="polite">
     <div class="lbl" id="saldoLbl">Te deben</div>
     <div class="big num" id="saldo">0,00 €</div>
-    <div class="row num"><span id="generado">Generado 0 €</span><span id="pagado">Pagado 0 €</span></div>
+    <div class="row num"><span id="generado"></span><span id="pagado"></span></div>
   </section>
 
   <div id="avisos" class="list" style="gap:10px"></div>
 
   <section class="card">
-    <h2>Apuntar horas</h2>
+    <h2 id="addTitulo">Apuntar horas</h2>
     <div class="chips">
-      <button class="chip" data-add="1">1 h</button>
-      <button class="chip" data-add="1.5">1,5 h</button>
-      <button class="chip" data-add="2">2 h</button>
-      <button class="chip" data-add="3">3 h</button>
+      <button class="chip" type="button" data-add="1">1 h</button>
+      <button class="chip" type="button" data-add="1.5">1,5 h</button>
+      <button class="chip" type="button" data-add="2">2 h</button>
+      <button class="chip" type="button" data-add="3">3 h</button>
     </div>
     <div class="fields" style="margin-top:12px">
       <label for="addFecha">Fecha
@@ -144,11 +162,11 @@ dialog h3{margin:0;font-family:var(--display);font-size:1.2rem}
         <input type="text" id="addHoras" inputmode="decimal" placeholder="1,25">
       </label>
     </div>
-    <div class="actions"><button class="primary" id="addOtra">Apuntar</button></div>
+    <div class="actions"><button class="primary" type="button" id="addOtra">Apuntar</button></div>
   </section>
 
   <section class="card bloque">
-    <h2 id="bloqueTitulo">Bloque actual</h2>
+    <h2>Hacia el próximo parcial</h2>
     <div class="top">
       <div class="horas num" id="bloqueHoras">0 h</div>
       <div class="muted small" id="bloqueDesde"></div>
@@ -159,6 +177,11 @@ dialog h3{margin:0;font-family:var(--display);font-size:1.2rem}
   <section class="card">
     <h2>Últimas clases</h2>
     <div class="list" id="ultimas"></div>
+  </section>
+
+  <section class="card" id="resumenCard">
+    <h2>Todos los grupos</h2>
+    <div class="list" id="resumen"></div>
   </section>
 </main>
 
@@ -173,7 +196,7 @@ dialog h3{margin:0;font-family:var(--display);font-size:1.2rem}
   <h1>Parciales</h1>
   <section class="card">
     <h2>Nuevo parcial</h2>
-    <p class="small muted" style="margin:0 0 12px">Cierra el bloque: todas las horas hasta esta fecha se pagan a 25 €/h más 5 €/h por cada alumno que apruebe.</p>
+    <p class="small muted" style="margin:0 0 12px" id="parExplica"></p>
     <div class="fields">
       <label for="parNombre" class="full">Nombre
         <input type="text" id="parNombre" placeholder="Parcial 1 de Mates">
@@ -184,7 +207,7 @@ dialog h3{margin:0;font-family:var(--display);font-size:1.2rem}
     </div>
     <div id="parAlumnos" style="margin-top:8px"></div>
     <label class="check" for="parPendiente"><input type="checkbox" id="parPendiente"> Aún no sé el resultado</label>
-    <div class="actions"><button class="primary" id="parGuardar">Guardar parcial</button></div>
+    <div class="actions"><button class="primary" type="button" id="parGuardar">Guardar parcial</button></div>
   </section>
   <section class="card">
     <h2>Historial</h2>
@@ -205,10 +228,10 @@ dialog h3{margin:0;font-family:var(--display);font-size:1.2rem}
         <input type="date" id="pagFecha">
       </label>
       <label for="pagNota" class="full">Nota (opcional)
-        <input type="text" id="pagNota" placeholder="Septiembre, Bizum…">
+        <input type="text" id="pagNota" placeholder="Noviembre, Bizum…">
       </label>
     </div>
-    <div class="actions"><button class="primary" id="pagGuardar">Guardar pago</button></div>
+    <div class="actions"><button class="primary" type="button" id="pagGuardar">Guardar pago</button></div>
   </section>
   <section class="card">
     <h2 id="pagosTitulo">Pagos recibidos</h2>
@@ -220,45 +243,42 @@ dialog h3{margin:0;font-family:var(--display);font-size:1.2rem}
 <main class="wrap" id="v-ajustes" hidden>
   <h1>Ajustes</h1>
   <section class="card">
-    <h2>Grupo</h2>
-    <div class="fields">
-      <label for="al0">Alumno 1<input type="text" id="al0"></label>
-      <label for="al1">Alumno 2<input type="text" id="al1"></label>
-      <label for="cfgTarifa">Tarifa base (€/h)<input type="text" id="cfgTarifa" inputmode="decimal"></label>
-      <label for="cfgBonus">Extra por aprobado (€/h)<input type="text" id="cfgBonus" inputmode="decimal"></label>
-    </div>
-    <p class="small muted" style="margin:12px 0 0">Cambiar la tarifa recalcula todas las horas ya apuntadas.</p>
+    <h2>Grupos</h2>
+    <div class="list" id="listaGrupos"></div>
+    <div class="actions"><button class="primary" type="button" data-act="nuevoGrupo">Añadir grupo</button></div>
+    <p class="small muted" style="margin:12px 0 0">Cambiar la tarifa de un grupo recalcula todas sus horas ya apuntadas.</p>
   </section>
   <section class="card">
     <h2>Copia de seguridad</h2>
     <p class="small muted" style="margin:0" id="copiaInfo"></p>
     <div class="actions">
-      <button class="primary" id="btnExportar">Exportar copia</button>
-      <button id="btnImportar">Importar copia</button>
+      <button class="primary" type="button" id="btnExportar">Exportar copia</button>
+      <button type="button" id="btnImportar">Importar copia</button>
       <input type="file" id="fileImport" accept=".json,application/json" hidden>
     </div>
   </section>
   <section class="card">
     <h2>Borrar datos</h2>
-    <p class="small muted" style="margin:0">Elimina todas las horas, parciales y pagos de este iPhone.</p>
-    <div class="actions"><button class="danger" id="btnBorrarTodo">Borrar todo</button></div>
+    <p class="small muted" style="margin:0">Elimina todos los grupos con sus horas, parciales y pagos de este iPhone.</p>
+    <div class="actions"><button class="danger" type="button" id="btnBorrarTodo">Borrar todo</button></div>
   </section>
 </main>
 
 <nav aria-label="Secciones">
-  <button data-view="inicio" aria-current="page"><svg viewBox="0 0 24 24"><path d="M3 11l9-7 9 7v9a1 1 0 0 1-1 1h-5v-6H9v6H4a1 1 0 0 1-1-1z"/></svg>Inicio</button>
-  <button data-view="horas"><svg viewBox="0 0 24 24"><circle cx="12" cy="12" r="9"/><path d="M12 7v5l3 2"/></svg>Horas</button>
-  <button data-view="parciales"><svg viewBox="0 0 24 24"><path d="M7 3h7l5 5v13H7z"/><path d="M14 3v5h5"/><path d="M10 14l2 2 4-4"/></svg>Parciales</button>
-  <button data-view="pagos"><svg viewBox="0 0 24 24"><rect x="3" y="6" width="18" height="13" rx="2"/><path d="M3 10h18"/><path d="M7 15h3"/></svg>Pagos</button>
-  <button data-view="ajustes"><svg viewBox="0 0 24 24"><path d="M4 7h10M18 7h2M4 17h4M12 17h8"/><circle cx="16" cy="7" r="2"/><circle cx="10" cy="17" r="2"/></svg>Ajustes</button>
+  <button type="button" data-view="inicio" aria-current="page"><svg viewBox="0 0 24 24"><path d="M3 11l9-7 9 7v9a1 1 0 0 1-1 1h-5v-6H9v6H4a1 1 0 0 1-1-1z"/></svg>Inicio</button>
+  <button type="button" data-view="horas"><svg viewBox="0 0 24 24"><circle cx="12" cy="12" r="9"/><path d="M12 7v5l3 2"/></svg>Horas</button>
+  <button type="button" data-view="parciales"><svg viewBox="0 0 24 24"><path d="M7 3h7l5 5v13H7z"/><path d="M14 3v5h5"/><path d="M10 14l2 2 4-4"/></svg>Parciales</button>
+  <button type="button" data-view="pagos"><svg viewBox="0 0 24 24"><rect x="3" y="6" width="18" height="13" rx="2"/><path d="M3 10h18"/><path d="M7 15h3"/></svg>Pagos</button>
+  <button type="button" data-view="ajustes"><svg viewBox="0 0 24 24"><path d="M4 7h10M18 7h2M4 17h4M12 17h8"/><circle cx="16" cy="7" r="2"/><circle cx="10" cy="17" r="2"/></svg>Ajustes</button>
 </nav>
 
 <dialog id="dlg"><form method="dialog" id="dlgForm"></form></dialog>
-<div class="toast" id="toast" hidden role="status"><span id="toastTxt"></span><button id="toastBtn" hidden>Deshacer</button></div>
+<div class="toast" id="toast" hidden role="status"><span id="toastTxt"></span><button type="button" id="toastBtn" hidden>Deshacer</button></div>
 
 <script>
 'use strict';
-const KEY = 'registro-clases-v1';
+const KEY = 'registro-clases-v2';
+const KEY_V1 = 'registro-clases-v1';
 const $ = s => document.querySelector(s);
 const eur = new Intl.NumberFormat('es-ES', { style: 'currency', currency: 'EUR' });
 const numf = new Intl.NumberFormat('es-ES', { maximumFractionDigits: 2 });
@@ -270,24 +290,49 @@ const fmtDLargo = iso => { const [y, m, d] = iso.split('-').map(Number); return 
 const parseNum = v => { const n = parseFloat(String(v).replace(/\s/g, '').replace(',', '.')); return isFinite(n) ? n : NaN; };
 const esc = s => String(s ?? '').replace(/[&<>"']/g, c => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', "'": '&#39;' }[c]));
 const byDate = (a, b) => a.fecha < b.fecha ? -1 : a.fecha > b.fecha ? 1 : 0;
+const r2 = n => Math.round(n * 100) / 100;
+const listaY = arr => arr.length <= 1 ? (arr[0] || '') : arr.slice(0, -1).join(', ') + ' y ' + arr[arr.length - 1];
 
-function defaults() {
-  return { version: 1, tarifa: 25, bonus: 5, alumnos: ['Alumno 1', 'Alumno 2'], sesiones: [], parciales: [], pagos: [], ultimaCopia: null };
+/* ---------- Datos ----------
+   v2: { version:2, grupos:[{id,nombre,tarifa,bonus,alumnos:[{id,nombre,baja?}],sesiones,parciales,pagos}], activo, ultimaCopia }
+   parcial.aprobados: null (sin resultado) o lista de ids de alumnos aprobados. */
+function nuevoGrupo(o) {
+  return Object.assign({ id: uid(), nombre: '', tarifa: 25, bonus: 5, alumnos: [], sesiones: [], parciales: [], pagos: [] }, o || {});
+}
+function normGrupo(g) {
+  const r = nuevoGrupo(g);
+  ['sesiones', 'parciales', 'pagos', 'alumnos'].forEach(k => { if (!Array.isArray(r[k])) r[k] = []; });
+  r.alumnos = r.alumnos.map((a, i) => typeof a === 'string' ? { id: uid(), nombre: a } : { id: a.id || uid(), nombre: a.nombre || 'Alumno ' + (i + 1), baja: !!a.baja });
+  r.tarifa = parseNum(r.tarifa); if (!(r.tarifa >= 0)) r.tarifa = 25;
+  r.bonus = parseNum(r.bonus); if (!(r.bonus >= 0)) r.bonus = 5;
+  r.parciales.forEach(p => { if (p.aprobados != null && !Array.isArray(p.aprobados)) p.aprobados = null; });
+  return r;
+}
+// Convierte los datos de la versión anterior (un solo grupo) en el primer grupo.
+function desdeV1(o) {
+  const nombres = Array.isArray(o.alumnos) && o.alumnos.length ? o.alumnos : ['Alumno 1', 'Alumno 2'];
+  const alumnos = nombres.map(n => ({ id: uid(), nombre: String(n || '') }));
+  const parciales = (o.parciales || []).map(p => Object.assign({}, p, {
+    aprobados: Array.isArray(p.aprobados) ? alumnos.filter((_, i) => p.aprobados[i]).map(a => a.id) : null
+  }));
+  const g = normGrupo({ nombre: '', tarifa: o.tarifa, bonus: o.bonus, alumnos, sesiones: o.sesiones || [], parciales, pagos: o.pagos || [] });
+  return { version: 2, grupos: [g], activo: g.id, ultimaCopia: o.ultimaCopia || null };
 }
 function normalize(o) {
-  const d = defaults();
-  const r = Object.assign({}, d, o || {});
-  ['sesiones', 'parciales', 'pagos'].forEach(k => { if (!Array.isArray(r[k])) r[k] = []; });
-  if (!Array.isArray(r.alumnos) || r.alumnos.length < 1) r.alumnos = d.alumnos;
-  r.tarifa = parseNum(r.tarifa); if (!(r.tarifa >= 0)) r.tarifa = d.tarifa;
-  r.bonus = parseNum(r.bonus); if (!(r.bonus >= 0)) r.bonus = d.bonus;
-  return r;
+  if (!o || typeof o !== 'object') return { version: 2, grupos: [], activo: null, ultimaCopia: null };
+  if (!Array.isArray(o.grupos)) return desdeV1(o);
+  const grupos = o.grupos.map(normGrupo);
+  return { version: 2, grupos, activo: o.activo, ultimaCopia: o.ultimaCopia || null };
 }
 function load() {
   try { const raw = localStorage.getItem(KEY); if (raw) return normalize(JSON.parse(raw)); } catch (e) {}
-  return defaults();
+  try { const raw = localStorage.getItem(KEY_V1); if (raw) return normalize(JSON.parse(raw)); } catch (e) {}
+  return normalize(null);
 }
 let S = load();
+let vista = 'inicio';
+function G() { return S.grupos.find(g => g.id === S.activo) || S.grupos[0] || null; }
+function nombreGrupo(g) { return g.nombre || listaY(g.alumnos.filter(a => !a.baja).map(a => a.nombre)) || 'Grupo sin nombre'; }
 function save() {
   try { localStorage.setItem(KEY, JSON.stringify(S)); }
   catch (e) { toast('No se ha podido guardar. Exporta una copia desde Ajustes.'); }
@@ -295,50 +340,64 @@ function save() {
 }
 
 /* ---------- Cálculo ----------
-   Cada parcial cierra un bloque con todas las horas hasta su fecha (incluida).
+   Cada parcial cierra un bloque con todas las horas del grupo hasta su fecha (incluida).
    Precio del bloque = tarifa + extra × nº de aprobados. Sin parcial o sin resultado: tarifa base. */
-function compute(state) {
-  const parc = [...state.parciales].sort(byDate);
-  const bloques = parc.map(p => ({ p, ses: [] }));
+function compute(g) {
+  const bloques = [...g.parciales].sort(byDate).map(p => ({ p, ses: [] }));
   const abierto = { p: null, ses: [] };
-  [...state.sesiones].sort(byDate).forEach(x => {
-    const b = bloques.find(b => x.fecha <= b.p.fecha);
-    (b || abierto).ses.push(x);
-  });
-  const todos = [...bloques, abierto];
+  [...g.sesiones].sort(byDate).forEach(x => { (bloques.find(b => x.fecha <= b.p.fecha) || abierto).ses.push(x); });
   let generado = 0;
-  todos.forEach(b => {
+  [...bloques, abierto].forEach(b => {
     b.horas = b.ses.reduce((a, x) => a + x.horas, 0);
     b.conResultado = !!(b.p && Array.isArray(b.p.aprobados));
-    b.nAprob = b.conResultado ? b.p.aprobados.filter(Boolean).length : 0;
-    b.precio = state.tarifa + state.bonus * b.nAprob;
+    b.nAprob = b.conResultado ? b.p.aprobados.length : 0;
+    b.precio = g.tarifa + g.bonus * b.nAprob;
     b.importe = b.horas * b.precio;
     generado += b.importe;
   });
-  const pagado = state.pagos.reduce((a, x) => a + x.importe, 0);
-  const r2 = n => Math.round(n * 100) / 100;
+  const pagado = g.pagos.reduce((a, x) => a + x.importe, 0);
   return { bloques, abierto, generado: r2(generado), pagado: r2(pagado), saldo: r2(generado - pagado) };
 }
 
 /* ---------- Render ---------- */
+const VIEWS = ['inicio', 'horas', 'parciales', 'pagos', 'ajustes'];
 function render() {
-  const C = compute(S);
-  const nombres = S.alumnos.filter(Boolean).join(' y ');
-  $('#grupoNombre').textContent = nombres ? 'Grupo de ' + nombres : '';
+  const g = G();
+  if (g && S.activo !== g.id) S.activo = g.id;
+  const hoy = today();
+
+  // Vistas
+  const sinGrupo = !g;
+  $('#v-vacio').hidden = !(sinGrupo && vista !== 'ajustes');
+  VIEWS.forEach(n => { $('#v-' + n).hidden = n !== vista || (sinGrupo && n !== 'ajustes'); });
+  document.querySelectorAll('nav button').forEach(b => {
+    if (b.dataset.view === vista) b.setAttribute('aria-current', 'page'); else b.removeAttribute('aria-current');
+  });
+
+  // Selector de grupo
+  $('#gbarWrap').hidden = vista === 'ajustes' || sinGrupo;
+  $('#gbar').innerHTML = S.grupos.map(x => `<button type="button" data-grupo="${x.id}" aria-pressed="${g && x.id === g.id}">${esc(nombreGrupo(x))}</button>`).join('')
+    + '<button type="button" class="add" data-act="nuevoGrupo">+ Grupo</button>';
+
+  renderAjustes();
+  if (!g) return;
+
+  const C = compute(g);
+  const activos = g.alumnos.filter(a => !a.baja);
+  const nomAl = id => (g.alumnos.find(a => a.id === id) || {}).nombre || 'Alumno';
 
   // Saldo
-  $('#saldoLbl').textContent = C.saldo < 0 ? 'Te han pagado de más' : 'Te deben';
+  $('#saldoLbl').textContent = C.saldo < 0 ? nombreGrupo(g) + ' te ha pagado de más' : 'Te debe ' + nombreGrupo(g);
   $('#saldo').textContent = eur.format(Math.abs(C.saldo));
   $('#generado').textContent = 'Generado ' + eur.format(C.generado);
   $('#pagado').textContent = 'Pagado ' + eur.format(C.pagado);
 
-  // Avisos
+  // Avisos (de todos los grupos)
   const av = [];
-  const hoy = today();
-  S.parciales.filter(p => !Array.isArray(p.aprobados) && p.fecha <= hoy).sort(byDate).forEach(p => {
-    av.push(`<div class="notice warn"><span><b>${esc(p.nombre || 'Parcial')}</b> (${fmtD(p.fecha)}) sin resultado</span><button type="button" data-edit="parcial:${p.id}">Poner resultado</button></div>`);
-  });
-  const hayDatos = S.sesiones.length + S.pagos.length + S.parciales.length > 0;
+  S.grupos.forEach(x => x.parciales.filter(p => !Array.isArray(p.aprobados) && p.fecha <= hoy).sort(byDate).forEach(p => {
+    av.push(`<div class="notice warn"><span><b>${esc(p.nombre || 'Parcial')}</b> de ${esc(nombreGrupo(x))} (${fmtD(p.fecha)}) sin resultado</span><button type="button" data-edit="parcial:${x.id}:${p.id}">Poner resultado</button></div>`);
+  }));
+  const hayDatos = S.grupos.some(x => x.sesiones.length + x.pagos.length + x.parciales.length > 0);
   const diasCopia = S.ultimaCopia ? Math.floor((Date.parse(hoy) - Date.parse(S.ultimaCopia)) / 864e5) : null;
   if (hayDatos && (diasCopia === null || diasCopia >= 14)) {
     av.push(`<div class="notice info"><span>${diasCopia === null ? 'Aún no has hecho ninguna copia de seguridad' : 'Última copia hace ' + diasCopia + ' días'}</span><button type="button" data-act="exportar">Exportar</button></div>`);
@@ -346,34 +405,48 @@ function render() {
   $('#avisos').innerHTML = av.join('');
   $('#avisos').hidden = av.length === 0;
 
+  // Apuntar
+  $('#addTitulo').textContent = 'Apuntar horas · ' + nombreGrupo(g);
+
   // Bloque actual
   const ab = C.abierto;
-  const ultimoParcial = [...S.parciales].sort(byDate).pop();
-  $('#bloqueTitulo').textContent = 'Hacia el próximo parcial';
+  const ultimoParcial = [...g.parciales].sort(byDate).pop();
   $('#bloqueHoras').textContent = fmtH(ab.horas);
   $('#bloqueDesde').textContent = ultimoParcial ? 'desde ' + fmtD(ultimoParcial.fecha) : (ab.ses.length ? 'desde ' + fmtD(ab.ses[0].fecha) : 'aún sin horas');
-  const nAl = Math.max(2, S.alumnos.length);
+  const n = Math.max(1, activos.length);
   const escs = [];
-  for (let k = 0; k <= Math.min(2, nAl); k++) {
-    const precio = S.tarifa + S.bonus * k;
-    escs.push(`<div class="esc"><span>${k === 0 ? 'Ninguno aprueba' : k === 1 ? 'Aprueba 1' : 'Aprueban 2'}</span><b>${eur.format(ab.horas * precio)}</b><span>${numf.format(precio)} €/h</span></div>`);
+  for (let k = 0; k <= n; k++) {
+    const precio = g.tarifa + g.bonus * k;
+    const lbl = n === 1 ? (k === 0 ? 'Suspende' : 'Aprueba') : k === 0 ? 'Ninguno aprueba' : k === 1 ? 'Aprueba 1' : 'Aprueban ' + k;
+    escs.push(`<div class="esc"><span>${lbl}</span><b>${eur.format(ab.horas * precio)}</b><span>${numf.format(precio)} €/h</span></div>`);
   }
   $('#escenarios').innerHTML = escs.join('');
 
-  // Últimas clases
-  const precioDe = new Map();
-  C.bloques.concat([C.abierto]).forEach(b => b.ses.forEach(x => precioDe.set(x.id, b)));
+  // Filas de clases
+  const bloqueDe = new Map();
+  [...C.bloques, C.abierto].forEach(b => b.ses.forEach(x => bloqueDe.set(x.id, b)));
   const filaSesion = x => {
-    const b = precioDe.get(x.id);
-    const prov = !b.conResultado;
-    return `<button type="button" class="item" data-edit="sesion:${x.id}">
+    const b = bloqueDe.get(x.id);
+    return `<button type="button" class="item" data-edit="sesion:${g.id}:${x.id}">
       <div class="main"><div class="t">${fmtD(x.fecha)}</div>${x.nota ? `<div class="s">${esc(x.nota)}</div>` : ''}</div>
-      <div class="amt num">${fmtH(x.horas)}<small>${eur.format(x.horas * b.precio)}${prov ? ' · provisional' : ''}</small></div></button>`;
+      <div class="amt num">${fmtH(x.horas)}<small>${eur.format(x.horas * b.precio)}${b.conResultado ? '' : ' · provisional'}</small></div></button>`;
   };
-  const ult = [...S.sesiones].sort(byDate).reverse().slice(0, 5);
+  const ult = [...g.sesiones].sort(byDate).reverse().slice(0, 5);
   $('#ultimas').innerHTML = ult.length ? ult.map(filaSesion).join('') : '<div class="empty">Toca 1 h, 1,5 h… arriba y la clase se apunta con la fecha de hoy.</div>';
 
-  // Vista Horas: bloques del más reciente al más antiguo
+  // Resumen de todos los grupos
+  $('#resumenCard').hidden = S.grupos.length < 2;
+  if (S.grupos.length > 1) {
+    let total = 0;
+    const filas = S.grupos.map(x => {
+      const cx = compute(x); total += cx.saldo;
+      return `<button type="button" class="item" data-grupo="${x.id}"><div class="main"><div class="t">${esc(nombreGrupo(x))}</div><div class="s">${fmtH(cx.abierto.horas)} hacia el próximo parcial</div></div><div class="amt num">${eur.format(cx.saldo)}<small>pendiente</small></div></button>`;
+    });
+    filas.push(`<div class="item total"><div class="main">Total que te deben</div><div class="amt num">${eur.format(r2(total))}</div></div>`);
+    $('#resumen').innerHTML = filas.join('');
+  }
+
+  // Vista Horas
   const bl = [...C.bloques, C.abierto].reverse().filter(b => b.p || b.ses.length);
   $('#bloques').innerHTML = bl.length ? bl.map(b => {
     let titulo, pill;
@@ -386,45 +459,40 @@ function render() {
     }
     return `<section class="card"><div class="blockhead"><div><div class="t">${titulo}</div><div class="small muted num">${fmtH(b.horas)} · ${eur.format(b.importe)}</div></div>${pill}</div>
       <div class="list">${b.ses.length ? [...b.ses].reverse().map(filaSesion).join('') : '<div class="empty">Sin horas en este bloque.</div>'}</div></section>`;
-  }).join('') : '<section class="card"><div class="empty">Todavía no hay horas. Apúntalas desde Inicio.</div></section>';
+  }).join('') : `<section class="card"><div class="empty">Todavía no hay horas de ${esc(nombreGrupo(g))}. Apúntalas desde Inicio.</div></section>`;
 
   // Parciales
-  $('#parAlumnos').innerHTML = S.alumnos.map((n, i) => `<label class="check" for="parAp${i}"><input type="checkbox" id="parAp${i}"> Ha aprobado ${esc(n || 'Alumno ' + (i + 1))}</label>`).join('');
+  $('#parExplica').textContent = `Cierra el bloque de ${nombreGrupo(g)}: todas sus horas hasta esta fecha se pagan a ${numf.format(g.tarifa)} €/h más ${numf.format(g.bonus)} €/h por cada alumno que apruebe.`;
+  const prevChecked = new Set([...document.querySelectorAll('#parAlumnos input:checked')].map(i => i.dataset.al));
+  $('#parAlumnos').innerHTML = activos.map(a => `<label class="check" for="parAp-${a.id}"><input type="checkbox" id="parAp-${a.id}" data-al="${a.id}" ${prevChecked.has(a.id) ? 'checked' : ''}> Ha aprobado ${esc(a.nombre)}</label>`).join('')
+    || '<p class="small muted" style="margin:0">Este grupo no tiene alumnos. Añádelos en Ajustes.</p>';
   syncPendiente();
   const ps = [...C.bloques].reverse();
   $('#listaParciales').innerHTML = ps.length ? ps.map(b => {
     const p = b.p;
     let res;
     if (!b.conResultado) res = 'Resultado pendiente';
-    else {
-      const ap = S.alumnos.filter((_, i) => p.aprobados[i]);
-      res = ap.length ? 'Aprueba' + (ap.length > 1 ? 'n ' : ' ') + ap.map(esc).join(' y ') : 'No aprueba ninguno';
-    }
-    return `<button type="button" class="item" data-edit="parcial:${p.id}"><div class="main"><div class="t">${esc(p.nombre || 'Parcial')}</div><div class="s">${fmtDLargo(p.fecha)} · ${res}</div></div>
+    else res = p.aprobados.length ? 'Aprueba' + (p.aprobados.length > 1 ? 'n ' : ' ') + esc(listaY(p.aprobados.map(nomAl))) : 'No aprueba ninguno';
+    return `<button type="button" class="item" data-edit="parcial:${g.id}:${p.id}"><div class="main"><div class="t">${esc(p.nombre || 'Parcial')}</div><div class="s">${fmtDLargo(p.fecha)} · ${res}</div></div>
       <div class="amt num">${eur.format(b.importe)}<small>${fmtH(b.horas)} a ${numf.format(b.precio)} €/h</small></div></button>`;
-  }).join('') : '<div class="empty">Aún no hay parciales.</div>';
+  }).join('') : '<div class="empty">Aún no hay parciales de este grupo.</div>';
 
   // Pagos
-  const pg = [...S.pagos].sort(byDate).reverse();
-  $('#pagosTitulo').textContent = 'Pagos recibidos · ' + eur.format(C.pagado);
-  $('#listaPagos').innerHTML = pg.length ? pg.map(x => `<button type="button" class="item" data-edit="pago:${x.id}"><div class="main"><div class="t">${fmtD(x.fecha)}</div>${x.nota ? `<div class="s">${esc(x.nota)}</div>` : ''}</div><div class="amt num">${eur.format(x.importe)}</div></button>`).join('') : '<div class="empty">Aún no hay pagos.</div>';
+  const pg = [...g.pagos].sort(byDate).reverse();
+  $('#pagosTitulo').textContent = 'Pagos de ' + nombreGrupo(g) + ' · ' + eur.format(C.pagado);
+  $('#listaPagos').innerHTML = pg.length ? pg.map(x => `<button type="button" class="item" data-edit="pago:${g.id}:${x.id}"><div class="main"><div class="t">${fmtD(x.fecha)}</div>${x.nota ? `<div class="s">${esc(x.nota)}</div>` : ''}</div><div class="amt num">${eur.format(x.importe)}</div></button>`).join('') : '<div class="empty">Aún no hay pagos de este grupo.</div>';
+}
 
-  // Ajustes
-  ['al0', 'al1'].forEach((id, i) => { const el = $('#' + id); if (document.activeElement !== el) el.value = S.alumnos[i] || ''; });
-  if (document.activeElement !== $('#cfgTarifa')) $('#cfgTarifa').value = numf.format(S.tarifa);
-  if (document.activeElement !== $('#cfgBonus')) $('#cfgBonus').value = numf.format(S.bonus);
+function renderAjustes() {
+  $('#listaGrupos').innerHTML = S.grupos.length ? S.grupos.map(x => {
+    const al = x.alumnos.filter(a => !a.baja).map(a => a.nombre);
+    return `<button type="button" class="item" data-act="editarGrupo" data-id="${x.id}"><div class="main"><div class="t">${esc(nombreGrupo(x))}</div><div class="s">${al.length ? esc(listaY(al)) : 'Sin alumnos'} · ${numf.format(x.tarifa)} €/h + ${numf.format(x.bonus)} €/h por aprobado</div></div><div class="amt muted">Editar</div></button>`;
+  }).join('') : '<div class="empty">Aún no hay grupos.</div>';
   $('#copiaInfo').textContent = S.ultimaCopia ? 'Última copia: ' + fmtDLargo(S.ultimaCopia) + '. Guárdala en Archivos o en iCloud Drive.' : 'Los datos solo están en este iPhone. Exporta una copia de vez en cuando y guárdala en Archivos o en iCloud Drive.';
 }
 
 /* ---------- Navegación ---------- */
-const VIEWS = ['inicio', 'horas', 'parciales', 'pagos', 'ajustes'];
-function show(v) {
-  VIEWS.forEach(n => { $('#v-' + n).hidden = n !== v; });
-  document.querySelectorAll('nav button').forEach(b => {
-    if (b.dataset.view === v) b.setAttribute('aria-current', 'page'); else b.removeAttribute('aria-current');
-  });
-  window.scrollTo(0, 0);
-}
+function show(v) { vista = v; render(); window.scrollTo(0, 0); }
 document.querySelector('nav').addEventListener('click', e => { const b = e.target.closest('button[data-view]'); if (b) show(b.dataset.view); });
 
 /* ---------- Aviso ---------- */
@@ -441,14 +509,15 @@ $('#toastBtn').addEventListener('click', () => { if (undoFn) undoFn(); $('#toast
 
 /* ---------- Apuntar horas ---------- */
 function addHoras(h) {
+  const g = G(); if (!g) return;
   if (!(h > 0) || h > 24) { toast('Escribe una duración válida, por ejemplo 1,5'); return; }
   const fecha = $('#addFecha').value || today();
-  const s = { id: uid(), fecha, horas: Math.round(h * 100) / 100, nota: '' };
-  S.sesiones.push(s);
+  const s = { id: uid(), fecha, horas: r2(h), nota: '' };
+  g.sesiones.push(s);
   save();
-  const b = compute(S);
-  const bloque = [...b.bloques, b.abierto].find(x => x.ses.some(y => y.id === s.id));
-  toast(`${fmtH(s.horas)} apuntadas el ${fmtD(fecha)} · +${eur.format(s.horas * bloque.precio)}`, () => { S.sesiones = S.sesiones.filter(x => x.id !== s.id); save(); });
+  const C = compute(g);
+  const b = [...C.bloques, C.abierto].find(x => x.ses.some(y => y.id === s.id));
+  toast(`${nombreGrupo(g)}: ${fmtH(s.horas)} el ${fmtD(fecha)} · +${eur.format(s.horas * b.precio)}`, () => { g.sesiones = g.sesiones.filter(x => x.id !== s.id); save(); });
   $('#addHoras').value = '';
   $('#addFecha').value = today();
 }
@@ -458,96 +527,165 @@ $('#addOtra').addEventListener('click', () => addHoras(parseNum($('#addHoras').v
 /* ---------- Parciales ---------- */
 function syncPendiente() {
   const pend = $('#parPendiente').checked;
-  S.alumnos.forEach((_, i) => { const c = $('#parAp' + i); if (c) { c.disabled = pend; if (pend) c.checked = false; } });
+  document.querySelectorAll('#parAlumnos input').forEach(c => { c.disabled = pend; if (pend) c.checked = false; });
 }
 $('#parPendiente').addEventListener('change', syncPendiente);
 $('#parGuardar').addEventListener('click', () => {
-  const fecha = $('#parFecha').value || today();
+  const g = G(); if (!g) return;
   const pend = $('#parPendiente').checked;
-  const p = { id: uid(), nombre: $('#parNombre').value.trim(), fecha, aprobados: pend ? null : S.alumnos.map((_, i) => $('#parAp' + i).checked) };
-  S.parciales.push(p);
+  const p = { id: uid(), nombre: $('#parNombre').value.trim(), fecha: $('#parFecha').value || today(),
+    aprobados: pend ? null : [...document.querySelectorAll('#parAlumnos input:checked')].map(i => i.dataset.al) };
+  g.parciales.push(p);
   $('#parNombre').value = ''; $('#parPendiente').checked = false; $('#parFecha').value = today();
+  document.querySelectorAll('#parAlumnos input').forEach(c => { c.checked = false; });
   save();
-  const b = compute(S).bloques.find(x => x.p.id === p.id);
+  const b = compute(g).bloques.find(x => x.p.id === p.id);
   toast(`Parcial guardado · ${fmtH(b.horas)} a ${numf.format(b.precio)} €/h = ${eur.format(b.importe)}`);
 });
 
 /* ---------- Pagos ---------- */
 $('#pagGuardar').addEventListener('click', () => {
+  const g = G(); if (!g) return;
   const imp = parseNum($('#pagImporte').value);
   if (!(imp > 0)) { toast('Escribe un importe válido, por ejemplo 250'); return; }
-  const p = { id: uid(), fecha: $('#pagFecha').value || today(), importe: Math.round(imp * 100) / 100, nota: $('#pagNota').value.trim() };
-  S.pagos.push(p);
+  const p = { id: uid(), fecha: $('#pagFecha').value || today(), importe: r2(imp), nota: $('#pagNota').value.trim() };
+  g.pagos.push(p);
   $('#pagImporte').value = ''; $('#pagNota').value = ''; $('#pagFecha').value = today();
   save();
-  toast(`Pago de ${eur.format(p.importe)} guardado`, () => { S.pagos = S.pagos.filter(x => x.id !== p.id); save(); });
+  toast(`Pago de ${eur.format(p.importe)} de ${nombreGrupo(g)} guardado`, () => { g.pagos = g.pagos.filter(x => x.id !== p.id); save(); });
 });
 
-/* ---------- Editar (diálogo) ---------- */
+/* ---------- Diálogo: editar clase / pago / parcial ---------- */
 const dlg = $('#dlg');
-function openEdit(kind, id) {
+function botonBorrar(onBorrar, texto) {
+  let armado = false;
+  $('#eBorrar').addEventListener('click', () => {
+    if (!armado) { armado = true; $('#eBorrar').textContent = texto || 'Toca otra vez para borrar'; return; }
+    onBorrar();
+  });
+}
+function openEdit(kind, gid, id) {
+  const g = S.grupos.find(x => x.id === gid); if (!g) return;
   const col = kind === 'sesion' ? 'sesiones' : kind === 'pago' ? 'pagos' : 'parciales';
-  const it = S[col].find(x => x.id === id);
+  const it = g[col].find(x => x.id === id);
   if (!it) return;
   let html = '';
   if (kind === 'sesion') {
-    html = `<h3>Editar clase</h3><div class="fields">
+    html = `<h3>Editar clase · ${esc(nombreGrupo(g))}</h3><div class="fields">
       <label for="eFecha">Fecha<input type="date" id="eFecha" value="${it.fecha}"></label>
       <label for="eHoras">Horas<input type="text" id="eHoras" inputmode="decimal" value="${numf.format(it.horas)}"></label>
       <label for="eNota" class="full">Nota<input type="text" id="eNota" value="${esc(it.nota)}" placeholder="Opcional"></label></div>`;
   } else if (kind === 'pago') {
-    html = `<h3>Editar pago</h3><div class="fields">
+    html = `<h3>Editar pago · ${esc(nombreGrupo(g))}</h3><div class="fields">
       <label for="eImporte">Importe (€)<input type="text" id="eImporte" inputmode="decimal" value="${numf.format(it.importe)}"></label>
       <label for="eFecha">Fecha<input type="date" id="eFecha" value="${it.fecha}"></label>
       <label for="eNota" class="full">Nota<input type="text" id="eNota" value="${esc(it.nota)}" placeholder="Opcional"></label></div>`;
   } else {
     const pend = !Array.isArray(it.aprobados);
-    html = `<h3>Editar parcial</h3><div class="fields">
+    const ap = new Set(pend ? [] : it.aprobados);
+    // Alumnos actuales, más los dados de baja que aparecen como aprobados en este parcial
+    const lista = g.alumnos.filter(a => !a.baja || ap.has(a.id));
+    html = `<h3>Editar parcial · ${esc(nombreGrupo(g))}</h3><div class="fields">
       <label for="eNombre" class="full">Nombre<input type="text" id="eNombre" value="${esc(it.nombre)}"></label>
       <label for="eFecha" class="full">Fecha<input type="date" id="eFecha" value="${it.fecha}"></label></div>
-      <div>${S.alumnos.map((n, i) => `<label class="check" for="eAp${i}"><input type="checkbox" id="eAp${i}" ${!pend && it.aprobados[i] ? 'checked' : ''} ${pend ? 'disabled' : ''}> Ha aprobado ${esc(n || 'Alumno ' + (i + 1))}</label>`).join('')}
-      <label class="check" for="ePend"><input type="checkbox" id="ePend" ${pend ? 'checked' : ''}> Aún no sé el resultado</label></div>`;
+      <div id="eAlumnos">${lista.map(a => `<label class="check" for="eAp-${a.id}"><input type="checkbox" id="eAp-${a.id}" data-al="${a.id}" ${ap.has(a.id) ? 'checked' : ''} ${pend ? 'disabled' : ''}> Ha aprobado ${esc(a.nombre)}</label>`).join('')}</div>
+      <label class="check" for="ePend"><input type="checkbox" id="ePend" ${pend ? 'checked' : ''}> Aún no sé el resultado</label>`;
   }
   html += `<div class="actions"><button type="button" class="danger" id="eBorrar">Borrar</button><button type="button" id="eCancelar">Cancelar</button><button type="button" class="primary" id="eGuardar">Guardar</button></div>`;
   $('#dlgForm').innerHTML = html;
   if (kind === 'parcial') {
-    $('#ePend').addEventListener('change', () => S.alumnos.forEach((_, i) => { const c = $('#eAp' + i); c.disabled = $('#ePend').checked; if (c.disabled) c.checked = false; }));
+    $('#ePend').addEventListener('change', () => document.querySelectorAll('#eAlumnos input').forEach(c => { c.disabled = $('#ePend').checked; if (c.disabled) c.checked = false; }));
   }
-  let armado = false;
-  $('#eBorrar').addEventListener('click', () => {
-    if (!armado) { armado = true; $('#eBorrar').textContent = 'Toca otra vez para borrar'; return; }
-    S[col] = S[col].filter(x => x.id !== id);
-    dlg.close(); save(); toast('Borrado');
-  });
+  botonBorrar(() => { g[col] = g[col].filter(x => x.id !== id); dlg.close(); save(); toast('Borrado'); });
   $('#eCancelar').addEventListener('click', () => dlg.close());
   $('#eGuardar').addEventListener('click', () => {
     const fecha = $('#eFecha').value || it.fecha;
     if (kind === 'sesion') {
       const h = parseNum($('#eHoras').value);
       if (!(h > 0) || h > 24) { toast('Escribe una duración válida'); return; }
-      Object.assign(it, { fecha, horas: Math.round(h * 100) / 100, nota: $('#eNota').value.trim() });
+      Object.assign(it, { fecha, horas: r2(h), nota: $('#eNota').value.trim() });
     } else if (kind === 'pago') {
       const imp = parseNum($('#eImporte').value);
       if (!(imp > 0)) { toast('Escribe un importe válido'); return; }
-      Object.assign(it, { fecha, importe: Math.round(imp * 100) / 100, nota: $('#eNota').value.trim() });
+      Object.assign(it, { fecha, importe: r2(imp), nota: $('#eNota').value.trim() });
     } else {
-      Object.assign(it, { fecha, nombre: $('#eNombre').value.trim(), aprobados: $('#ePend').checked ? null : S.alumnos.map((_, i) => $('#eAp' + i).checked) });
+      Object.assign(it, { fecha, nombre: $('#eNombre').value.trim(),
+        aprobados: $('#ePend').checked ? null : [...document.querySelectorAll('#eAlumnos input:checked')].map(i => i.dataset.al) });
     }
     dlg.close(); save(); toast('Guardado');
   });
   dlg.showModal();
 }
+
+/* ---------- Diálogo: crear / editar grupo ---------- */
+function openGrupo(gid) {
+  const g = gid ? S.grupos.find(x => x.id === gid) : null;
+  const alumnos = g ? g.alumnos.filter(a => !a.baja).map(a => ({ id: a.id, nombre: a.nombre })) : [{ id: uid(), nombre: '' }];
+  const filaAl = a => `<div class="alrow" data-al="${a.id}"><input type="text" id="gAl-${a.id}" value="${esc(a.nombre)}" placeholder="Nombre del alumno" aria-label="Nombre del alumno"><button type="button" data-quitar="${a.id}" aria-label="Quitar alumno">✕</button></div>`;
+  $('#dlgForm').innerHTML = `<h3>${g ? 'Editar grupo' : 'Nuevo grupo'}</h3>
+    <label for="gNombre">Nombre del grupo (opcional)<input type="text" id="gNombre" value="${esc(g ? g.nombre : '')}" placeholder="Si lo dejas vacío, se usan los nombres de los alumnos"></label>
+    <div><div class="small muted" style="margin-bottom:6px">Alumnos que van juntos a clase</div>
+      <div id="gAlumnos" style="display:flex;flex-direction:column;gap:8px">${alumnos.map(filaAl).join('')}</div>
+      <button type="button" class="link" id="gAddAl">+ Añadir alumno</button></div>
+    <div class="fields">
+      <label for="gTarifa">Tarifa (€/h)<input type="text" id="gTarifa" inputmode="decimal" value="${numf.format(g ? g.tarifa : 25)}"></label>
+      <label for="gBonus">Extra por aprobado (€/h)<input type="text" id="gBonus" inputmode="decimal" value="${numf.format(g ? g.bonus : 5)}"></label>
+    </div>
+    <div class="actions">${g ? '<button type="button" class="danger" id="eBorrar">Borrar grupo</button>' : ''}<button type="button" id="eCancelar">Cancelar</button><button type="button" class="primary" id="eGuardar">${g ? 'Guardar' : 'Crear grupo'}</button></div>`;
+  $('#gAddAl').addEventListener('click', () => {
+    const a = { id: uid(), nombre: '' };
+    $('#gAlumnos').insertAdjacentHTML('beforeend', filaAl(a));
+    $('#gAl-' + a.id).focus();
+  });
+  $('#gAlumnos').addEventListener('click', e => { const b = e.target.closest('[data-quitar]'); if (b) b.closest('.alrow').remove(); });
+  $('#eCancelar').addEventListener('click', () => dlg.close());
+  if (g) botonBorrar(() => {
+    S.grupos = S.grupos.filter(x => x.id !== g.id);
+    if (S.activo === g.id) S.activo = S.grupos[0] ? S.grupos[0].id : null;
+    dlg.close(); save(); toast('Grupo borrado');
+  }, 'Toca otra vez: se borran sus horas y pagos');
+  $('#eGuardar').addEventListener('click', () => {
+    const tarifa = parseNum($('#gTarifa').value), bonus = parseNum($('#gBonus').value);
+    if (!(tarifa >= 0) || !(bonus >= 0)) { toast('Revisa la tarifa y el extra por aprobado'); return; }
+    const filas = [...document.querySelectorAll('#gAlumnos .alrow')].map(r => ({ id: r.dataset.al, nombre: r.querySelector('input').value.trim() })).filter(a => a.nombre);
+    const nombre = $('#gNombre').value.trim();
+    if (!nombre && !filas.length) { toast('Pon un nombre al grupo o al menos un alumno'); return; }
+    if (g) {
+      const ids = new Set(filas.map(a => a.id));
+      const usados = new Set(g.parciales.flatMap(p => p.aprobados || []));
+      // Los alumnos quitados que salen como aprobados en algún parcial se guardan como baja para no cambiar lo ya cobrado
+      const quitados = g.alumnos.filter(a => !ids.has(a.id) && usados.has(a.id)).map(a => Object.assign({}, a, { baja: true }));
+      Object.assign(g, { nombre, tarifa, bonus, alumnos: [...filas, ...quitados] });
+      dlg.close(); save(); toast('Grupo guardado');
+    } else {
+      const ng = normGrupo({ nombre, tarifa, bonus, alumnos: filas });
+      S.grupos.push(ng); S.activo = ng.id;
+      dlg.close(); vista = 'inicio'; save(); window.scrollTo(0, 0);
+      toast('Grupo creado: ' + nombreGrupo(ng));
+    }
+  });
+  dlg.showModal();
+  if (!g) $('#gNombre').focus();
+}
+
+/* ---------- Clics generales ---------- */
 document.addEventListener('click', e => {
   const ed = e.target.closest('[data-edit]');
-  if (ed) { const [k, id] = ed.dataset.edit.split(':'); openEdit(k, id); return; }
-  const act = e.target.closest('[data-act="exportar"]');
-  if (act) exportar();
+  if (ed) { const [k, gid, id] = ed.dataset.edit.split(':'); openEdit(k, gid, id); return; }
+  const gr = e.target.closest('[data-grupo]');
+  if (gr) {
+    S.activo = gr.dataset.grupo; save();
+    const btn = document.querySelector(`#gbar [data-grupo="${S.activo}"]`);
+    if (btn) btn.scrollIntoView({ inline: 'nearest', block: 'nearest' });
+    if (gr.closest('#resumen')) window.scrollTo(0, 0);
+    return;
+  }
+  const act = e.target.closest('[data-act]');
+  if (!act) return;
+  if (act.dataset.act === 'exportar') exportar();
+  else if (act.dataset.act === 'nuevoGrupo') openGrupo(null);
+  else if (act.dataset.act === 'editarGrupo') openGrupo(act.dataset.id);
 });
-
-/* ---------- Ajustes ---------- */
-['al0', 'al1'].forEach((id, i) => $('#' + id).addEventListener('change', e => { S.alumnos[i] = e.target.value.trim() || 'Alumno ' + (i + 1); save(); }));
-$('#cfgTarifa').addEventListener('change', e => { const n = parseNum(e.target.value); if (n >= 0) { S.tarifa = n; save(); toast('Tarifa actualizada'); } else render(); });
-$('#cfgBonus').addEventListener('change', e => { const n = parseNum(e.target.value); if (n >= 0) { S.bonus = n; save(); toast('Extra por aprobado actualizado'); } else render(); });
 
 /* ---------- Copia de seguridad ---------- */
 async function exportar() {
@@ -577,8 +715,8 @@ $('#fileImport').addEventListener('change', e => {
     try {
       const o = JSON.parse(rd.result);
       const d = normalize(o.datos || o);
-      const n = d.sesiones.length, p = d.pagos.length;
-      if (!confirm(`La copia tiene ${n} clases y ${p} pagos. ¿Sustituir los datos actuales?`)) return;
+      const clases = d.grupos.reduce((a, g) => a + g.sesiones.length, 0);
+      if (!confirm(`La copia tiene ${d.grupos.length} grupo(s) y ${clases} clases. ¿Sustituir los datos actuales?`)) { e.target.value = ''; return; }
       S = d; save(); toast('Copia importada');
     } catch (err) { toast('Ese archivo no es una copia válida de esta app'); }
     e.target.value = '';
@@ -586,13 +724,15 @@ $('#fileImport').addEventListener('change', e => {
   rd.readAsText(f);
 });
 $('#btnBorrarTodo').addEventListener('click', () => {
-  if (!confirm('¿Borrar todas las horas, parciales y pagos? No se puede deshacer.')) return;
-  const keep = { tarifa: S.tarifa, bonus: S.bonus, alumnos: S.alumnos };
-  S = Object.assign(defaults(), keep); save(); toast('Datos borrados');
+  if (!confirm('¿Borrar todos los grupos con sus horas, parciales y pagos? No se puede deshacer.')) return;
+  S = { version: 2, grupos: [], activo: null, ultimaCopia: S.ultimaCopia };
+  save(); toast('Datos borrados');
 });
 
 /* ---------- Arranque ---------- */
 ['#addFecha', '#parFecha', '#pagFecha'].forEach(s => { $(s).value = today(); });
+// Guarda ya en el nuevo formato (los datos antiguos se quedan intactos como respaldo)
+try { if (!localStorage.getItem(KEY) && S.grupos.length) localStorage.setItem(KEY, JSON.stringify(S)); } catch (e) {}
 render();
 try { navigator.storage && navigator.storage.persist && navigator.storage.persist(); } catch (e) {}
 if ('serviceWorker' in navigator && location.protocol.startsWith('http')) {
